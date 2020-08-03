@@ -12,6 +12,7 @@ app.get("/", (req, res) => {
 });
 
 let count = 0
+list = []
 
 io.on("connection", socket => {
     console.log(`New client connected ${count}`);
@@ -22,19 +23,13 @@ io.on("connection", socket => {
 
     socket.on('new message', (msg) => {
         console.log(msg, "MSG")
-        io.emit('thread', msg)
+        
+        list.push(msg)
+        console.log(list,"list")
+        io.emit('thread', list)
     })
-    
-    socket.on('room', data => {
-        console.log('room join')
-        console.log(data, 'data')
-        socket.join(data.room)
-    });
-    
-    socket.on('leave room', data =>{
-        console.log('leaving room')
-        console.log(data, 'data')
-        socket.leave(data.room)
+    socket.on('state', i => {
+        io.emit('count', i)
     })
 
 
