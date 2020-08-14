@@ -7,7 +7,7 @@ const thread = require("./Models/thread-model");
 // Token used to verify user
 const Token = "dhgishglshgujdhlgfdjhgsjldfhgsiulrhgurlghdfj";
 
-server.listen(5000, () => {
+server.listen(process.env.PORT || 5000, () => {
   console.log("Listening at :5000...");
 });
 
