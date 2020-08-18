@@ -1,6 +1,7 @@
-const app = require("express")();
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
+const express = require('express')
+const app = express()
+const server = require('http').createServer(app);
+const io = require('socket.io').listen(server);
 const users = require("./Models/users-model");
 const thread = require("./Models/thread-model");
 
@@ -20,6 +21,8 @@ let count = 0;
 
 io.on("connection", (socket) => {
   console.log(`New client connected ${count}`);
+
+  io.emit("here", "Here")
 
   socket.on("disconnect", () => {
     console.log(`Disconnected`);
@@ -45,7 +48,6 @@ io.on("connection", (socket) => {
       })
       .catch((err) => console.log({ message: "error loging in" }));
 
-    // io.emit('log', username)
   });
   // socket for registering new user
   socket.on("register", (credentials) => {
