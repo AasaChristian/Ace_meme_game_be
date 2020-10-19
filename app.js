@@ -4,12 +4,13 @@ const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
 const users = require("./Models/users-model");
 const thread = require("./Models/thread-model");
+const Port = process.env.PORT || 5000;
 
 // Token used to verify user
 const Token = "dhgishglshgujdhlgfdjhgsjldfhgsiulrhgurlghdfj";
 
-server.listen(process.env.PORT || 5000, () => {
-  console.log("Listening at :5000...");
+server.listen(Port, () => {
+  console.log(`Listening at ${Port}`);
 });
 
 app.get("/", (req, res) => {
@@ -18,6 +19,8 @@ app.get("/", (req, res) => {
 
 //  varable to count user connections
 let count = 0;
+
+
 
 io.on("connection", (socket) => {
   console.log(`New client connected ${count}`);
@@ -31,6 +34,7 @@ io.on("connection", (socket) => {
   thread
     .findById()
     .then((message) => {
+      console.log(message, "message")
       io.emit("thread", message);
     })
     .catch((err) => console.log({ message: "no lins" }));
