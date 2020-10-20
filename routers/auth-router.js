@@ -44,7 +44,6 @@ router.post('/login', (req, res) => {
 
 function signToken(user) {
   const payload = {
-    department: user.department,
     username: user.username
   };
 
