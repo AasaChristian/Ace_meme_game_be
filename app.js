@@ -4,6 +4,7 @@ const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
 const users = require("./Models/users-model");
 const thread = require("./Models/thread-model");
+const userAuth = require("./routers/auth-router")
 const Port = process.env.PORT || 5000;
 
 // Token used to verify user
@@ -13,7 +14,11 @@ server.listen(Port, () => {
   console.log(`Listening at ${Port}`);
 });
 
-app.get("/", (req, res) => {
+
+server.use(express.json());
+server.use('/api', userAuth);
+
+server.get("/", (req, res) => {
   res.send({ response: "I am alive" }).status(200);
 });
 
