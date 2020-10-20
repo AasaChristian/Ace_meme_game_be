@@ -15,10 +15,11 @@ server.listen(Port, () => {
 });
 
 
-server.use(express.json());
-server.use('/api', userAuth);
+app.use(express.json());
 
-server.get("/", (req, res) => {
+app.use('/api', userAuth);
+
+app.get("/", (req, res) => {
   res.send({ response: "I am alive" }).status(200);
 });
 
