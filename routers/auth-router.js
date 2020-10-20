@@ -4,7 +4,7 @@ const router = require('express').Router();
 
 const { jwtSecret } = require('./config/secrets')
 
-const Users = require('./model');
+const Users = require('../Models/users-model');
 
 // for endpoints beginning with /api/auth
 router.post('/register', (req, res) => {
@@ -12,7 +12,7 @@ router.post('/register', (req, res) => {
   const hash = bcrypt.hashSync(user.password, 10); // 2 ^ n
   user.password = hash;
 
-  Users.add(user)
+  Users.addUser(user)
     .then(saved => {
       res.status(201).json(saved);
     })
@@ -24,7 +24,7 @@ router.post('/register', (req, res) => {
 router.post('/login', (req, res) => {
   let { username, password } = req.body;
 
-  Users.findBy({ username })
+  Users.findByUserName(username)
     .first()
     .then(user => {
       if (user && bcrypt.compareSync(password, user.password)) {
