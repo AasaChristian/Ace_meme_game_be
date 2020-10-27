@@ -24,6 +24,8 @@ router.post('/register', (req, res) => {
 router.post('/login', (req, res) => {
   let { username, password } = req.body;
 
+  console.log(username, password, "credits")
+
   Users.findByUserName(username)
     .first()
     .then(user => {
@@ -50,6 +52,7 @@ function signToken(user) {
   const options = {
     expiresIn: '1d'
   };
+console.log("signToken")
 
   return jwt.sign(payload, jwtSecret, options);
 }

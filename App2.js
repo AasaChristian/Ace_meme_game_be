@@ -106,3 +106,40 @@ io.on("connection", (socket) => {
 
   count += 1;
 });
+
+
+
+socket.on("login", (credentials) => {
+  const { creds, room } = credentials;
+  const {username, password} = creds
+
+  console.log(creds, "creds")
+  console.log(room, "room")
+
+  users.findByUserName(username)
+  .then(user => {
+    // console.log(user, "user")
+    if (user && bcrypt.compareSync(password, user[0].password)) {
+
+      const token = signToken(user); // <<<<<<<<<<<
+
+      // console.log({ token }); // <<<<<<<<<<
+      console.log("TOKEN GOOD")
+    } else {
+      console.log({ message: 'Invalid Credentials' });
+    }
+  })
+  .catch(error => {
+    console.log(error, "Error");
+  });
+  // users
+  //   .findByUserName(username)
+  //   .then((user) => {
+  //     console.log(user[0].password, password);
+  //     if (user[0].password == password) {
+  //       socket.emit("token", { Token: Token, username: user[0].username });
+  //     }
+  //   })
+  //   .catch((err) => console.log({ message: "error loging in" }));
+
+});
