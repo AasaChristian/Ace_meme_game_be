@@ -47,12 +47,14 @@ io.on("connection", (socket) => {
 
   // socket for login user
   
+  // When The client first load joinRoom page, client sends username from user's local storage
   socket.on("selectRoom", (username) => {
-
+// uses username to get user Id from users table
     users.findByUserName(username).then(user => {
       let idForUserSearch = user[0].id
-
+// uses user id to find all threads the user has joined in the past.
       thread.findByUserId(idForUserSearch).then(rooms => {
+// this emit send the users room back to the client
         socket.emit("preRoom", (rooms))
       }).catch(error => {
         console.log(error, "no rooms")
