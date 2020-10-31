@@ -34,21 +34,19 @@ let count = 0;
 io.on("connection", (socket) => {
   console.log(`New client connected ${count}`)
 
-  socket.on("disconnect", () => {
-    console.log(`Disconnected`);
-  });
-  // thread
-  //   .findById()
-  //   .then((message) => {
-  //     console.log(message, "message")
-  //     io.emit("thread", message);
-  //   })
-  //   .catch((err) => console.log({ message: "no lins" }));
+  // socket.on('join', ({roomName}) => {
+  //   console.log(roomName, "room Name from join socket")
+  //   thread.findByRoomName(roomName).then(room => {
+  //     console.log(room, "found room")
+  //   }).catch(error => console.log(error))
+  // })
+
+
 
   // socket for login user
   
   // When The client first load joinRoom page, client sends username from user's local storage
-  socket.on("selectRoom", (username) => {
+  socket.on("sendUserNameForConnectedRooms", (username) => {
 // uses username to get user Id from users table
     users.findByUserName(username).then(user => {
       let idForUserSearch = user[0].id
@@ -65,11 +63,12 @@ io.on("connection", (socket) => {
   })
 
 
-socket.on("roomName", (room) => {
+  socket.on("CreateNewRoom", (room) => {
 
 const {roomName, userName} = room
    
 console.log(roomName, "roomName")
+
     const roomObj = {
       name: roomName
     }
@@ -87,6 +86,9 @@ console.log(roomName, "roomName")
           thread.startThread(threadObj).then(newThread => {
             console.log(newThread, "NewThread")
           }).catch(err => console.log(err))
+
+          socket.emit('message', {user: 'admin', text: `Hello ${userName}! You have created the ${roomName} room!`})
+          // socket.join(roomName)
     
         }).catch(err => console.log(err, "room was not created"))
    
@@ -94,12 +96,88 @@ console.log(roomName, "roomName")
      console.log(error)})
   })
 
-  socket.on("selectedRoomName", (selectedRoomName) => {
-    console.log(selectedRoomName, "selected room from front end")
+  socket.on("join", (selectedRoomName) => {
+    const {roomName, userName} = selectedRoomName
+    console.log(roomName, "room Name from join socket")
+    console.log(userName, "userName  from join socket")
+
+    thread.findByRoomName(roomName).then(room => {
+      console.log(room, "found room")
+      socket.join(room[0].roomId)
+
+
+      socket.emit('message', {user: 'admin', text: `Hello ${userName} ! Welcome to the ${room[0].name} room!`})
+      console.log(`Hello ${userName}! Welcome to the ${room[0].name} room!`)
+
+      socket.broadcast.to(room[0].roomId).emit('message',{user: 'admin', text: `${userName} has join the chat`})
+
+
+
+
+    }).catch(error => console.log(error))
+  })
+
+  socket.on('newMessage', ({message, userName, roomName}) => {
+
+    users.findByUserName(userName)
+    .then(user => {
+      const userId = user[0].id
+
+      thread.findByRoomName(roomName).then(roomData => {
+        console.log(roomData, "roomData")
+        const roomId = roomData[0].roomId
+        NewMessageObg = {
+          roomId: roomId,
+          userId: userId,
+          line: message
+        };
+        thread.addto(NewMessageObg).then(message => {
+          console.log(message, "meesage Res")
+         const threadId = message[0].id
+          thread
+          .findByRoomId(roomId)
+          .then((threadToBeReturned) => {
+            console.log(threadToBeReturned, "35");
+            console.log(roomName, "roomName be emitted to")
+            io.to(roomName).emit("thread", {message: threadToBeReturned, userName: userName});
+          })
+          .catch((err) => console.log({ err: "no lins" }));
+
+
+        }).catch(error => console.log(error))
+
+
+      })
+
+   
+   }).catch((error)  => {
+    console.log(error)})
+    
+
+
   })
 
 
+  socket.on('refresh', (roomName) => {
+    console.log(roomName,"refreash")
+    thread.findByRoomName(roomName).then(roomData => {
+      console.log(roomData, "roomData")
+      console.log(roomName, "roomName be emitted to")
+      const roomId = roomData[0].roomId
 
+      thread
+        .findByRoomId(roomId)
+        .then((threadToBeReturned) => {
+          console.log(threadToBeReturned, "172");
+          console.log(roomId, "copy")
+          console.log(roomName, "173")
+
+          io.to(threadToBeReturned[0].roomId).emit("thread", {message: threadToBeReturned, userName: null});
+        })
+        .catch((err) => console.log(err));
+
+    }).catch((err) => console.log(err))
+  })
   socket.on("login", (credentials) => {
     const { creds} = credentials;
     const {username, password} = creds
@@ -109,7 +187,7 @@ console.log(roomName, "roomName")
       .then((user) => {
         console.log(user[0].password, password, "checking");
         if (user[0].password == password) {
-          socket.emit("token", { Token: Token , username: user[0].username });
+          socket.emit("token", { Token: Token , username: user[0].username});
         }
       })
       .catch((err) => console.log({ message: "error loging in" }));
@@ -140,27 +218,6 @@ console.log(roomName, "roomName")
       .catch((err) => console.log({ message: "error adding User" }));
   });
 
-  // socket.on("new message", (msg) => {
-  //   console.log(msg, "MSG");
-  //   line = {
-  //     name: "MeMe Game",
-  //     line: msg.message,
-  //     user: msg.user,
-  //   };
-  //   thread
-  //     .addto(line)
-  //     .then((message) => {
-  //       thread
-  //         .findById()
-  //         .then((message) => {
-  //           console.log(message, "35");
-  //           io.emit("thread", message);
-  //         })
-  //         .catch((err) => console.log({ message: "no lins" }));
-  //     })
-  //     .catch((err) => console.log({ message: "new message not sent" }));
-  // });
-
   socket.on("sent_meme", (pic) => {
     io.emit("returned_meme", pic);
   });
@@ -171,6 +228,11 @@ console.log(roomName, "roomName")
   //   })
   //   .catch((err) => console.log(err, "error deleting thread"))
   // })
+
+
+  socket.on("disconnect", () => {
+    console.log(`Disconnected`);
+  });
 
   count += 1;
 });
