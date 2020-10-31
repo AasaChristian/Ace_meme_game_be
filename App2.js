@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
       .catch((err) => console.log({ message: "error adding User" }));
   });
 
-  socket.on("new message", (msg) => {
+  socket.on("newMessage", (msg) => {
     console.log(msg, "MSG");
     line = {
       name: "MeMe Game",
